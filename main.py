@@ -5,10 +5,10 @@ def response(p):
     #import the api key from toml file
     openai.api_key = st.secrets["OPENAI_API_KEY"]
     response = openai.Completion.create(
-        engine="text-davinci-002",
+        engine="text-davinci-003",
         prompt=p,
-        temperature=0.9,
-        max_tokens=400,
+        temperature=0.8,
+        max_tokens=500,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0.6
