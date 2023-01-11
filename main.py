@@ -31,7 +31,7 @@ def idea():
 def main():
     st.markdown("<h1 style='text-align: center; color: white;'>FeedbackAI</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: white;'> FeedbackAI is a startup idea generator that can give you feedback and critique on your startup idea</p>", unsafe_allow_html=True)
-    st.markdown("<h5 style='text-align: center; color: white;'>built by [nixo](https://nixo.framer.website) (with GPT-3)</h5>", unsafe_allow_html=True)
+    st.write("#### Built by [nixo](https://nixo.framer.website)")
     st.write('---')
     #make an input to write the idea
     idea_input = st.text_input('Write your startup idea here')
