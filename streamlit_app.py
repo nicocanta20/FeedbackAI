@@ -1,34 +1,10 @@
 import streamlit as st
 from openai import OpenAI
-client = OpenAI()
 
-def response(prompt):
-    completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are an assistant specialized in analyzing and providing feedback on startup ideas. Generate innovative startup ideas, offer constructive feedback, and provide critical analysis with an emphasis on market viability, innovation, and potential challenges."},
-            {"role": "user", "content": prompt}
-        ])
-    message_content = completion.choices[0].message.content
-    return message_content
-
-def feedback(idea):
-    prompt = f"Provide a detailed, constructive feedback on the following startup idea, focusing on its potential market impact, uniqueness, and scalability:\n\n{idea}"
-    return response(prompt)
-
-def critique(idea):
-    prompt = f"Offer a detailed, critical analysis of the following startup idea, highlighting areas of potential concern, such as market competition, feasibility, and risk factors:\n\n{idea}"
-    return response(prompt)
-
-def idea():
-    prompt = "Generate a detailed startup idea that addresses a current technology trend or market need, including its unique value proposition and potential customer base"
-    return response(prompt)
-
-#streamlit app interface
 def main():
-    
+    # Streamlit interface setup
     st.markdown("<h1 style='text-align: center; color: white;'>FeedbackAI</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: white;'> FeedbackAI is a startup idea generator that can give you feedback and critique on your startup idea</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: white;'>FeedbackAI is a startup idea generator that can give you feedback and critique on your startup idea</p>", unsafe_allow_html=True)
     
     st.write('---')
 
@@ -38,28 +14,42 @@ def main():
         api_key = st.text_input("Enter your OpenAI API key:", type="password")
         st.write("#### Built by [nixo](https://nixo.framer.website)")
 
-    # Updating the API key in the session state
-    if api_key:
-        st.session_state["OPENAI_API_KEY"] = api_key
-        client.api_key = api_key
     # Check if the API key is set
-    if client.api_key is None:
+    if not api_key:
         st.error("Please enter your OpenAI API key in the sidebar.")
         return
-    
-    #make an input to write the idea
+    else:
+        client = OpenAI(api_key=api_key)
+
+    # Function to get response from OpenAI
+    def get_response(client, prompt):
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are an assistant specialized in analyzing and providing feedback on startup ideas. Generate innovative startup ideas, offer constructive feedback, and provide critical analysis with an emphasis on market viability, innovation, and potential challenges."},
+                {"role": "user", "content": prompt}
+            ])
+        return completion.choices[0].message.content
+
+    # Streamlit interface for input and buttons
     idea_input = st.text_input('Write your startup idea here')
-    #make two tabs for feedback and critique
-    tab1,tab2,tab3 = st.tabs(['Get Feedback','Get Critique','Dont have an idea?'])
+    
+    tab1, tab2, tab3 = st.tabs(['Get Feedback', 'Get Critique', 'Don’t have an idea?'])
+    
     with tab1:
-        if st.button('Submit',key='feedback'):
-            st.write(feedback(idea_input))
+        if st.button('Submit for Feedback'):
+            feedback_prompt = f"Provide detailed, constructive feedback on this startup idea:\n\n{idea_input}"
+            st.write(get_response(client, feedback_prompt))
+
     with tab2:
-        if st.button('Submit',key='critique'):
-            st.write(critique(idea_input))
+        if st.button('Submit for Critique'):
+            critique_prompt = f"Offer a critical analysis of this startup idea:\n\n{idea_input}"
+            st.write(get_response(client, critique_prompt))
+
     with tab3:
         if st.button('Generate a new idea'):
-            st.write(idea())
+            idea_prompt = "Generate a detailed startup idea that addresses a current technology trend or market need."
+            st.write(get_response(client, idea_prompt))
 
 if __name__ == '__main__':
     main()
