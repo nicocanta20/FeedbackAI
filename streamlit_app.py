@@ -1,18 +1,17 @@
 import streamlit as st
-import openai
+from openai import OpenAI
+client = OpenAI()
 
-def response(p):
-    response = openai.Completion.create(
-        engine="gpt-3.5-turbo-instruct",
-        prompt=p,
-        temperature=0.8,
-        max_tokens=500,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0.6
-    )
-    return response.choices[0].text
-    
+def response(prompt):
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are an assistant specialized in analyzing and providing feedback on startup ideas. Generate innovative startup ideas, offer constructive feedback, and provide critical analysis with an emphasis on market viability, innovation, and potential challenges."},
+            {"role": "user", "content": prompt}
+        ])
+    message_content = completion.choices[0].message.content
+    return message_content
+
 def feedback(idea):
     prompt = f"Provide a detailed, constructive feedback on the following startup idea, focusing on its potential market impact, uniqueness, and scalability:\n\n{idea}"
     return response(prompt)
@@ -42,12 +41,9 @@ def main():
     # Updating the API key in the session state
     if api_key:
         st.session_state["OPENAI_API_KEY"] = api_key
-        openai.api_key = api_key
-    else:
-        openai.api_key = st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else None
-
+        client.api_key = api_key
     # Check if the API key is set
-    if openai.api_key is None:
+    if client.api_key is None:
         st.error("Please enter your OpenAI API key in the sidebar.")
         return
     
